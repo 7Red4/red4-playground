@@ -200,7 +200,7 @@ export default {
     },
     receive(msgdata) {
       this.messages.push(msgdata);
-      // $(".msgArea").animate({ scrollTop: $(".allMsg").height() }, 500);
+      $(".msgArea").animate({ scrollTop: $(".allMsg").height() }, 500);
     }
   }
 };

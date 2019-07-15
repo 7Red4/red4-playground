@@ -18,8 +18,6 @@
     "cross-env": "^5.2.0",
     "eslint": "^6.0.1",
     "express": "^4.16.4",
-    "jQuery": "^1.7.4",
-    "jsdom": "^15.1.1",
     "node-sass": "^4.12.0",
     "nuxt": "^2.0.0",
     "sass-loader": "^7.1.0",

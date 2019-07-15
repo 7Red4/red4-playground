@@ -46,7 +46,6 @@ function socketStart(server) {
         onlineUsers: onlineUsers,
         userName: userName
       };
-      console.log(123);
       io.emit("EFB_user-in", resData);
     });
     socket.on("EFC_user-out", function(userName) {
