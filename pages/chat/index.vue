@@ -1,5 +1,5 @@
 <template>
-  <v-layout id="chatter" column wrap fill-height>
+  <v-layout id="chatter" column wrap fill-height align-center>
     <v-toolbar app>
       <v-toolbar-title>CHAT IT UP</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -131,7 +131,6 @@ export default {
     this.socket.on("EFB_user-out", function(resData) {
       vm.userOut(resData.onlineUsers, resData.userName);
     });
-    $("body")[0].style.height = window.innerHeight + "px";
     window.addEventListener("resize", this.handleResize);
   },
   beforeDestroy() {
@@ -153,7 +152,7 @@ export default {
     },
     sendImg() {
       var usr = this.user;
-      var msg = `<img src="${this.imgPreviewSrc}" />`;
+      var msg = `<img style="max-width:100%;" src="${this.imgPreviewSrc}" />`;
       this.socket.emit("EFC_message", { user: usr, message: msg });
       this.imgUrl = "";
       this.imgLocalUrl = "";
@@ -214,7 +213,7 @@ $tablet: "screen and (max-width: 992px)";
 }
 
 img {
-  max-width: 100%;
+  max-width: 100% !important;
 }
 
 .chat-body {
