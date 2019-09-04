@@ -33,10 +33,10 @@
             </v-list-tile-content>
           </div>
           <v-divider></v-divider>
-          <v-layout row align-center justify-end class="mt-3" v-if="sending">
-            <v-progress-circular indeterminate color="primary"></v-progress-circular>
-          </v-layout>
         </div>
+        <v-layout row align-center justify-end class="mt-3" v-if="sending">
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        </v-layout>
       </div>
     </v-list>
 
