@@ -1,7 +1,10 @@
 <template>
   <v-layout id="chatter" column wrap fill-height align-center>
     <v-toolbar app>
-      <v-toolbar-title>CHAT IT UP</v-toolbar-title>
+      <v-toolbar-title>
+        CHAT IT UP
+        <!-- 這之後可以變成群組名或對象名 -->
+      </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items>
         <v-menu offset-y>
@@ -9,7 +12,7 @@
             <v-btn v-on="on" flat>線上人數：{{onlineUsers.length}}</v-btn>
           </template>
           <v-list>
-            <v-list-tile v-for="(user, index) in onlineUsers" :key="index" @click>
+            <v-list-tile v-for="(user, index) in onlineUsers" :key="index">
               <v-list-tile-title>{{ user }}</v-list-tile-title>
             </v-list-tile>
           </v-list>
@@ -30,6 +33,9 @@
             </v-list-tile-content>
           </div>
           <v-divider></v-divider>
+          <v-layout row align-center justify-end class="mt-3" v-if="sending">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          </v-layout>
         </div>
       </div>
     </v-list>
@@ -60,19 +66,31 @@
       class="py-3"
     >
       <v-card>
-        <v-text-field class="px-3" label="可以試試圖片連結" v-model="imgUrl" @change="setImg('url')"></v-text-field>
-
+        <div v-show="imgPreviewSrc != ''">
+          <v-layout row wrap>
+            <v-flex xs12>
+              <v-img :src="imgPreviewSrc" @error="imgPreviewSrc = ''"></v-img>
+            </v-flex>
+            <v-flex xs12 class="px-4">
+              <v-btn @click="sendImg" color="primary" block>就 4 這張!</v-btn>
+            </v-flex>
+          </v-layout>
+        </div>
+        <v-responsive v-show="imgPreviewSrc == ''" :aspect-ratio="4/3">
+          <v-layout justify-center align-center fill-height>迷 u 圖片</v-layout>
+        </v-responsive>
         <v-card-actions>
           <v-btn color="primary" tag="label" block>
-            也可以試試本地檔案
-            <input hidden type="file" accept="image/*" @change="setImg('local', $event)" />
+            {{imgPreviewSrc == '' ? '上傳圖片' : '換一張圖好惹'}}
+            <input
+              hidden
+              type="file"
+              accept="image/*"
+              @change="setImg('local', $event)"
+            />
           </v-btn>
+          <v-btn @click="imgModal = false" color="error" block outline>算惹還是不要傳好惹</v-btn>
         </v-card-actions>
-        <div v-show="imgPreviewSrc != ''">
-          <v-img :src="imgPreviewSrc" @error="imgPreviewSrc = ''"></v-img>
-          <v-btn @click="sendImg" color="primary" block>就 4 這張!</v-btn>
-        </div>
-        <v-btn @click="imgModal = false" color="error" block flat>算惹還是不要傳好惹</v-btn>
       </v-card>
     </v-dialog>
 
@@ -102,6 +120,9 @@ import io from "socket.io-client";
 
 export default {
   name: "chatter",
+  head: {
+    title: "聊起來啊"
+  },
   data() {
     return {
       socket: null,
@@ -110,6 +131,7 @@ export default {
       userNameModal: true,
       imgModal: false,
       showUsers: false,
+      sending: false,
       imgUrl: "",
       imgLocalUrl: "",
       imgPreviewSrc: "",
@@ -151,9 +173,13 @@ export default {
       this.modal = true;
     },
     sendImg() {
+      this.sending = true;
       var usr = this.user;
-      var msg = `<img style="max-width:100%;" src="${this.imgPreviewSrc}" />`;
-      this.socket.emit("EFC_message", { user: usr, message: msg });
+      this.socket.emit("EFC_message", {
+        user: usr,
+        type: "img",
+        message: this.imgPreviewSrc
+      });
       this.imgUrl = "";
       this.imgLocalUrl = "";
       this.imgPreviewSrc = "";
@@ -182,10 +208,23 @@ export default {
       }
     },
     send() {
+      this.sending = true;
       var usr = this.user;
       var msg = this.sendMessage;
       if (msg != "") {
-        this.socket.emit("EFC_message", { user: usr, message: msg });
+        if (/^https:\/\/|^http:\/\//.test(msg.trim())) {
+          this.socket.emit("EFC_message", {
+            user: usr,
+            type: "url",
+            message: msg
+          });
+        } else {
+          this.socket.emit("EFC_message", {
+            user: usr,
+            type: "text",
+            message: msg
+          });
+        }
         this.sendMessage = "";
       }
     },
@@ -198,6 +237,10 @@ export default {
       this.onlineUsers = onlineUsers;
     },
     receive(msgdata) {
+      this.sending = false;
+      if (msgdata.type == "img") {
+        msgdata.message = `<img style="max-width:100%;" src="${msgdata.message}" />`;
+      }
       this.messages.push(msgdata);
       $(".msgArea").animate({ scrollTop: $(".allMsg").height() }, 500);
     }

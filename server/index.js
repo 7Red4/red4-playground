@@ -1,6 +1,7 @@
 const express = require("express");
 const consola = require("consola");
 const { Nuxt, Builder } = require("nuxt");
+const request = require("request");
 const app = express();
 
 // Import and Set Nuxt.js options
@@ -57,7 +58,16 @@ function socketStart(server) {
       io.emit("EFB_user-out", resData);
     });
     socket.on("EFC_message", function(msg) {
-      io.emit("EFB_message", msg);
+      if (msg.type == "url") {
+        request(msg.message, (err, res, body) => {
+          if (res.headers["content-type"].includes("image")) {
+            msg.type = "img";
+          }
+          io.emit("EFB_message", msg);
+        });
+      } else {
+        io.emit("EFB_message", msg);
+      }
     });
   });
 }
