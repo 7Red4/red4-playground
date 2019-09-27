@@ -40,8 +40,8 @@ var onlineUsers = [];
 function socketStart(server) {
   const io = require("socket.io").listen(server);
   io.on("connection", socket => {
-    socket.on("disconnect", function() {});
-    socket.on("EFC_user-in", function(userName) {
+    io.emit("EFB_init-send-user-list", onlineUsers);
+    socket.on("EFC_user-in", userName => {
       onlineUsers.push(userName);
       var resData = {
         onlineUsers: onlineUsers,
@@ -49,7 +49,15 @@ function socketStart(server) {
       };
       io.emit("EFB_user-in", resData);
     });
-    socket.on("EFC_user-out", function(userName) {
+    socket.on("EFC_anonymous-in", userName => {
+      onlineUsers.push(userName);
+      var resData = {
+        onlineUsers: onlineUsers,
+        userName: userName
+      };
+      io.emit("EFB_anonymous-in", resData);
+    });
+    socket.on("EFC_user-out", userName => {
       onlineUsers.splice(onlineUsers.indexOf(userName), 1);
       var resData = {
         onlineUsers: onlineUsers,
@@ -57,7 +65,7 @@ function socketStart(server) {
       };
       io.emit("EFB_user-out", resData);
     });
-    socket.on("EFC_message", function(msg) {
+    socket.on("EFC_message", msg => {
       if (msg.type == "url") {
         request(msg.message, (err, res, body) => {
           if (res.headers["content-type"].includes("image")) {
