@@ -1,5 +1,5 @@
 <template>
-  <v-layout id="chatter" column wrap fill-height align-center>
+  <v-layout id="chatter" column fill-height align-center style="flex-wrap: nowrap;">
     <v-menu offset-y open-on-hover>
       <template v-slot:activator="{ on }">
         <v-btn v-on="on" outlined class="mb-3">線上人數：{{onlineUsers.length}}</v-btn>
@@ -311,7 +311,6 @@ export default {
         this.sendMessage = "";
       }
       this.sending = false;
-
     },
     userIn({ onlineUsers, userName }) {
       this.receive({ user: "系統", message: `${userName} 衝了進來！！` });

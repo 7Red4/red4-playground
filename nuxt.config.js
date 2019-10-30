@@ -6,8 +6,7 @@ module.exports = {
    ** Headers of the page
    */
   head: {
-    titleTemplate: process.env.npm_package_name + " - %s",
-    title: process.env.npm_package_name || "",
+    titleTemplate: "紅柿的 u樂場" + " - %s",
     meta: [
       { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
