@@ -1,33 +1,24 @@
 <template>
   <v-layout id="chatter" column wrap fill-height align-center>
-    <v-toolbar app>
-      <v-toolbar-title>
-        CHAT IT UP
-        <!-- 這之後可以變成群組名或對象名 -->
-      </v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-toolbar-items>
-        <v-menu offset-y>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" flat>線上人數：{{onlineUsers.length}}</v-btn>
-          </template>
-          <v-list>
-            <v-list-tile v-for="(user, index) in onlineUsers" :key="index">
-              <v-list-tile-title>{{ user }}</v-list-tile-title>
-            </v-list-tile>
-          </v-list>
-        </v-menu>
-        <!-- <v-btn color="primary" dark flat @click="change">改名稱</v-btn> -->
-      </v-toolbar-items>
-    </v-toolbar>
+    <v-menu offset-y open-on-hover>
+      <template v-slot:activator="{ on }">
+        <v-btn v-on="on" outlined class="mb-3">線上人數：{{onlineUsers.length}}</v-btn>
+      </template>
+      <v-list>
+        <v-list-item v-for="(user, index) in onlineUsers" :key="index">
+          <v-list-item-title>{{ user }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+
     <v-list two-line class="msgArea">
       <div class="allMsg px-3">
         <div v-for="(msg, idx) in messages" :key="idx">
-          <div class="message_block my-2" :class="{'self' : user == msg.user}">
-            <v-list-tile-content>
-              <v-list-tile-title>{{msg.user}} 說：</v-list-tile-title>
-              <v-list-tile-sub-title class="sended_msg" v-html="msg.message"></v-list-tile-sub-title>
-            </v-list-tile-content>
+          <div class="message_block my-2" :class="{'self': user == msg.user}">
+            <v-list-item-content>
+              <v-list-item-title>{{msg.user}} 說：</v-list-item-title>
+              <v-list-item-subtitle class="sended_msg" v-html="msg.message"></v-list-item-subtitle>
+            </v-list-item-content>
           </div>
           <v-divider></v-divider>
         </div>
@@ -38,7 +29,7 @@
     </v-list>
 
     <div class="px-2 textBox" :class="{'fix': focus}">
-      <v-btn icon color="cyan" dark @click="imgModal = true">
+      <v-btn icon color="cyan" dark @click="imgModal = true" class="mr-2">
         <v-icon>insert_photo</v-icon>
       </v-btn>
       <v-textarea
@@ -49,8 +40,11 @@
         class="textarea_box py-3"
         @focus="focus = true"
         @blur="focus = false"
+        @keyup="typeIn"
+        :hint="$vuetify.breakpoint.mdAndUp ? '同時按下 Ctrl + Enter 可直接送出' : ''"
+        no-resize
       ></v-textarea>
-      <v-btn icon color="primary" @click="send">
+      <v-btn icon color="primary" @click="send" class="ml-2">
         <v-icon>send</v-icon>
       </v-btn>
     </div>
@@ -77,41 +71,50 @@
           </v-responsive>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" tag="label" block>
-            {{imgPreviewSrc == '' ? '上傳圖片' : '換一張圖好惹'}}
-            <input
-              hidden
-              type="file"
-              accept="image/*"
-              @change="setImg('local', $event)"
-            />
-          </v-btn>
-          <v-btn @click="imgModal = false" color="error" block outline>算惹還是不要傳好惹</v-btn>
-          <v-btn @click="sendImg" color="primary" block v-show="imgPreviewSrc != ''">就 4 這張!</v-btn>
+          <v-layout column>
+            <v-btn
+              @click="sendImg"
+              color="primary"
+              class="mb-3"
+              v-show="imgPreviewSrc != ''"
+            >就 4 這張!</v-btn>
+            <v-layout row justify-center>
+              <v-btn color="primary" tag="label">
+                {{imgPreviewSrc == '' ? '上傳圖片' : '換一張圖好惹'}}
+                <input
+                  hidden
+                  type="file"
+                  accept="image/*"
+                  @change="setImg('local', $event)"
+                />
+              </v-btn>
+              <v-btn @click="imgModal = false" color="error" outlined>算惹還是不要傳好惹</v-btn>
+            </v-layout>
+          </v-layout>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="userNameModal" persistent max-width="500px" transition="dialog-transition">
-      <v-card>
-        <v-card-text>
+      <v-card class="py-10">
+        <v-card-text class="pb-0">
           <v-form ref="form" @submit.prevent>
             <v-text-field
-              outline
+              outlined
               class="px-3"
               label="先來取個暱稱吧"
               name="user"
-              v-model="user"
+              v-model="newUserName"
               @keyup.enter="setUserName"
               :rules="[v => !!v || '不是沒有名字吧！']"
               :required="true"
             ></v-text-field>
           </v-form>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="py-0">
           <v-layout justify-center>
             <v-btn color="primary" @click="setUserName">加入！</v-btn>
-            <v-btn color="primary" outline @click="enterAnonymous">我害羞我想匿名</v-btn>
+            <v-btn color="primary" outlined @click="enterAnonymous">我害羞我想匿名</v-btn>
           </v-layout>
         </v-card-actions>
       </v-card>
@@ -168,6 +171,7 @@ export default {
       imgUrl: "",
       imgLocalUrl: "",
       imgPreviewSrc: "",
+      newUserName: "",
       user: "",
       sendMessage: "",
       onlineUsers: [],
@@ -193,12 +197,13 @@ export default {
       vm.setAnonymousName(resData);
     });
     window.addEventListener("resize", this.handleResize);
-    window.addEventListener("unload", () => {
+    window.addEventListener("beforeunload", () => {
       vm.socket.emit("EFC_user-out", this.user);
     });
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.handleResize);
+    this.socket.emit("EFC_user-out", this.user);
   },
   methods: {
     handleResize() {
@@ -237,13 +242,13 @@ export default {
       if (this.$refs.form.validate()) {
         const vm = this;
         for (let i = 0; i < vm.onlineUsers.length; i++) {
-          if (vm.onlineUsers[i] == vm.user) {
+          if (vm.onlineUsers[i] == vm.newUserName) {
             vm.dialogMessage = "名字重複啦!換一個吧!";
             vm.dialog = true;
             return;
           }
         }
-        this.socket.emit("EFC_user-in", this.user);
+        this.socket.emit("EFC_user-in", this.newUserName);
         this.userNameModal = false;
       }
     },
@@ -305,9 +310,12 @@ export default {
         }
         this.sendMessage = "";
       }
+      this.sending = false;
+
     },
     userIn({ onlineUsers, userName }) {
       this.receive({ user: "系統", message: `${userName} 衝了進來！！` });
+      this.user = userName;
       this.onlineUsers = onlineUsers;
     },
     userOut({ onlineUsers, userName }) {
@@ -321,6 +329,11 @@ export default {
       }
       this.messages.push(msgdata);
       $(".msgArea").animate({ scrollTop: $(".allMsg").height() }, 500);
+    },
+    typeIn(e) {
+      if (e.code == "Enter" && e.ctrlKey) {
+        this.send();
+      }
     }
   }
 };
@@ -368,7 +381,7 @@ img {
   }
 }
 .message_block {
-  .v-list__tile__content {
+  .v-list__item__content {
     height: auto !important;
   }
 }
@@ -378,6 +391,9 @@ img {
   height: 100%;
   max-height: 72vh;
   overflow-y: hidden;
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
   &:hover {
     overflow-y: scroll;
   }
@@ -386,7 +402,7 @@ img {
   }
 }
 
-.self .v-list__tile__content * {
+.self .v-list-item__content * {
   text-align: right !important;
   color: #2ca42c;
 }

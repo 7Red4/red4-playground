@@ -7,7 +7,7 @@
       {{ otherError }}
     </h1>
     <NuxtLink to="/">
-      Home page
+      回到首頁
     </NuxtLink>
   </v-app>
 </template>
@@ -31,7 +31,7 @@ export default {
   data() {
     return {
       pageNotFound: '好像迷路了',
-      otherError: 'An error occurred'
+      otherError: '哀呀好像出了甚麼錯'
     }
   }
 }
