@@ -1,10 +1,17 @@
 # red4-playground
 
-> 
+It's a repo that build by Nuxt + express.js and it's deployed on GCP
+Using Vuetify as UI components.
+
+Different kinds of practice
+including:
+
+- Real time chat which is build by socket.io
+- Trying to create scroll effect like other modern web(ex. apple's web)
 
 ## Build Setup
 
-``` bash
+```bash
 # install dependencies
 $ npm run install
 
