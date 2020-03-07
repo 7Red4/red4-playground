@@ -1,14 +1,14 @@
 <template>
   <div>
-    <p class="fix">{{ st }}</p>
-    <div class="have-height" style="background-color: red"></div>
-    <scene :st="st" :duration="1000" @change="(val) => {s1Percentage = val}">
+    <p class="scroll-top">scroll top: {{ st }}</p>
+    <div class="have-height" style="background-color: #faa"></div>
+    <scene :st="st" :duration="duration" @change="(val) => {s1Percentage = val}">
       <div class="con">
         <div :style="[moveRight]">asdasdasdsad</div>
         <div :style="[moveLeft]">asdasdasdsad</div>
       </div>
     </scene>
-    <div class="have-height" style="background-color: blue"></div>
+    <div class="have-height" style="background-color: #aaf"></div>
   </div>
 </template>
 
@@ -41,6 +41,7 @@ export default {
       st: 0,
       scrollHeight: 0,
       vh: 0,
+      duration: 1500,
 
       s1Percentage: 0
     };
@@ -58,6 +59,10 @@ export default {
       let output = {
         transform: `translateX(${pa}%)`
       };
+      let keyFrame = `
+        {from{transform:translateX(0%);width:20%;}48%{transform:translateX(120%);width:43%;}to{transform:translateX(100%);width:120%;}}
+      `;
+      this.createKeyFrames(keyFrame);
       return output;
     },
     moveLeft() {
@@ -74,14 +79,27 @@ export default {
         window.pageYOffset ||
         document.documentElement.scrollTop ||
         document.body.scrollTop;
+    },
+    createKeyFrames(jsk) {
+      const keys = jsk
+        .replace(/from/, "0%")
+        .replace(/to/, "100%")
+        .replace(/ /g, "")
+        .replace("{", "")
+        .split("}")
+        .filter(v => !!v);
+      // const
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.fix {
+.scroll-top {
   position: fixed;
+  font-weight: 900;
+  font-size: 48px;
+  padding: 32px;
 }
 .con {
   display: flex;

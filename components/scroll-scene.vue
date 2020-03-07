@@ -1,6 +1,9 @@
 <template>
-  <div class="scene" :style="[fixStyle, overflowStyle]">
-    <slot></slot>
+  <div class="scene">
+    <div class="holder" :style="{'height': `${this.clientHeight + this.duration}px`}"></div>
+    <div class="content" :style="[fixStyle, overflowStyle]">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -14,17 +17,18 @@ export default {
   data() {
     return {
       bindOn: 0,
-      clientHeight: 0,
-      elementId: Math.floor(Math.random() * 10000) // this should be change
+      clientHeight: 0
     };
   },
   mounted() {
     this.bindOn = this.bindPoint || this.$el.offsetTop;
-    this.clientHeight = this.$el.clientHeight;
-    const holder = document.createElement("div");
-    holder.style.height = `${this.clientHeight + this.duration}px`;
-    const sib = this.$el.nextSibling;
-    this.$el.parentNode.insertBefore(holder, sib);
+    setTimeout(() => {
+      this.clientHeight = window.innerHeight;
+      window.addEventListener("resize", this.updateClientHeight);
+    });
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.updateClientHeight);
   },
   computed: {
     isOverflow() {
@@ -47,7 +51,8 @@ export default {
     overflowStyle() {
       let output = {
         position: "absolute",
-        top: `${this.bindOn + this.duration}px`
+        top: "auto",
+        bottom: 0
       };
       return this.isOverflow ? output : {};
     },
@@ -58,13 +63,24 @@ export default {
       };
       return this.souldFix ? output : {};
     }
+  },
+  methods: {
+    updateClientHeight() {
+      this.clientHeight = window.innerHeight;
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
 .scene {
+  position: relative;
   width: 100vw;
+}
+.content {
+  position: absolute;
+  top: 0;
+  width: 100%;
   height: 100vh;
 }
 .fix {
