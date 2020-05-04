@@ -59,9 +59,7 @@ export default {
       let output = {
         transform: `translateX(${pa}%)`
       };
-      let keyFrame = `
-        {from{transform:translateX(0%);width:20%;}48%{transform:translateX(120%);width:43%;}to{transform:translateX(100%);width:120%;}}
-      `;
+      let keyFrame = ``;
       this.createKeyFrames(keyFrame);
       return output;
     },
@@ -81,14 +79,7 @@ export default {
         document.body.scrollTop;
     },
     createKeyFrames(jsk) {
-      const keys = jsk
-        .replace(/from/, "0%")
-        .replace(/to/, "100%")
-        .replace(/ /g, "")
-        .replace("{", "")
-        .split("}")
-        .filter(v => !!v);
-      // const
+      //
     }
   }
 };
